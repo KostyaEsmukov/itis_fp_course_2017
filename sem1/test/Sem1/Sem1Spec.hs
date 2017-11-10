@@ -37,12 +37,6 @@ spec = do
           `shouldBe` (LamI (LamI (LamI (LamI (SymI 4)))))
         toTermI (app (sym "x") (sym "y")) `shouldBe` (AppI (SymI 0) (SymI 0))
 
-        -- telegram Kirill
-        -- toTermI (app (lam "x" $ app (sym "x") (sym "x")) (lam "y" $ app (sym "z") (app (sym "y") (sym "z"))))
-        --   `shouldBe` (AppI (LamI (AppI (SymI 0) (SymI 0))) (LamI (AppI (SymI 1) (AppI (SymI 0) (SymI 1)))))
-        -- toTermI (lam "y" $ app (sym "z") (app (sym "y") (sym "z")))
-        --   `shouldBe` (LamI (AppI (SymI 1) (AppI (SymI 0) (SymI 1))))
-
     it "tests betaI" $ do
         betaI (LamI (AppI (LamI (SymI 0)) (LamI (LamI (AppI (SymI 0) (LamI (SymI 2)))))))
           `shouldBe` (Just (LamI (LamI (LamI (AppI (SymI 0) (LamI (SymI 2)))))))
@@ -53,11 +47,6 @@ spec = do
         betaI (AppI (SymI 0) (SymI 0)) `shouldBe` Nothing
         betaI (LamI $ LamI (AppI (LamI $ LamI (AppI (SymI 1) (SymI 0))) (SymI 1)))
           `shouldBe` Just (LamI (LamI (LamI (AppI (SymI 2) (SymI 0)))))
-
-    -- it "tests reductions" $ do
-    --     -- telegram Kirill
-    --     betaI (toTermI (app (lam "x" $ app (sym "x") (sym "x")) (lam "y" $ app (sym "z") (app (sym "y") (sym "z")))))
-    --       `shouldBe` Just (AppI (LamI (AppI (SymI 1) (AppI (SymI 0) (SymI 1)))) (LamI (AppI (SymI 1) (AppI (SymI 0) (SymI 1)))))
 
     it "tests toTermS" $ do
         toTermS (Nil) `shouldBe` (lam "s" $ lam "z" $ sym "z")
@@ -81,20 +70,25 @@ spec = do
         -- solve (Y (Natural 4)) `shouldBe` Left four
 
         solve (IsNil Nil) `shouldBe` Left trueI
-        solve (IsNil (Natural 4)) `shouldBe` Left falseI
-        solve (IsNil (Natural 0)) `shouldBe` Left trueI
-        -- solve (IsNil (Cons (Natural 2) Nil)) `shouldBe` Left falseI
+        solve (IsNil (Cons (Natural 4) Nil)) `shouldBe` Left falseI
+        solve (IsNil (Cons (Natural 4) (Cons (Natural 2) Nil))) `shouldBe` Left falseI
+
+        -- todo empty lists??
+
+        solve (Head (Cons (Natural 4) Nil)) `shouldBe` Left four
 
         solve (Head (Cons (Natural 4) (Cons (Natural 2) (Cons (Natural 1) Nil))))
           `shouldBe` Left four
 
-    it "tests solve with tests I'm not sure about" $ do
-        solve (Cons (Natural 1) Nil)
-          `shouldBe` Left (LamI (LamI (AppI (AppI (SymI 1) one) (AppI (AppI falseI (SymI 1)) (SymI 0)))))
-        solve (Cons (Natural 4) (Cons (Natural 1) Nil))
-          `shouldBe` Left (LamI (LamI (AppI (AppI (SymI 1) four) (AppI (AppI (AppI (AppI (LamI (LamI (LamI (LamI (AppI (AppI (SymI 1) (SymI 3)) (AppI (AppI (SymI 2) (SymI 1)) (SymI 0))))))) one) falseI) (SymI 1)) (SymI 0)))))
+        solve (Tail (Cons (Natural 19) Nil)) `shouldBe` Left falseI
 
-        solve (Tail (Cons (Natural 3) (Cons (Natural 4) (Cons (Natural 1) Nil))))
-          `shouldBe` Left (LamI (LamI (AppI (AppI (SymI 1) four) (AppI (AppI (AppI (AppI (AppI (LamI (LamI (LamI (LamI (AppI (AppI (SymI 1) (SymI 3)) (AppI (AppI (SymI 2) (SymI 1)) (SymI 0))))))) one) falseI) (LamI (LamI (LamI (AppI (AppI (SymI 0) (SymI 2)) (AppI (SymI 1) (SymI 4))))))) (LamI (SymI 1))) (SymI 1)))))
+        solve (Tail (Cons (Natural 19) (Cons (Natural 1) Nil)))
+          `shouldBe` solve (Cons (Natural 1) Nil)
 
+        solve (Tail (Cons (Natural 19) (Cons (Natural 1) (Cons (Natural 4) Nil))))
+          `shouldBe` solve (Cons (Natural 1) (Cons (Natural 4) Nil))
+
+    it "tests specific lists impl" $ do
+        solve (Cons (Natural 4) Nil)
+          `shouldBe` Left (LamI (AppI (AppI (SymI 0) four) falseI))
 
