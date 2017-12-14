@@ -185,3 +185,10 @@ spec = do
         (typeOf $ Tail (Boolean True))
             `shouldBe` Left "Arg of Tail must be of List type"
 
+    it "other tests (by teacher)" $ do
+        (typeOf $ Cons (Lam "x" Nat $ Sym "x") $ Nil (Fun Nat Nat))
+            `shouldBe` Right (List $ Fun Nat Nat)
+
+        (typeOf $ Lam "x" Bool $ Lam "x" Nat $ Sym "x")
+            `shouldBe` Right (Fun Bool (Fun Nat Nat))
+
